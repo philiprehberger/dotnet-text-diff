@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Build settings -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Package metadata -->
+    <PackageId>Philiprehberger.TextDiff</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Philip Rehberger</Authors>
+    <Description>Line-by-line text diff using Myers' algorithm — unified diff output, side-by-side comparison, and structured DiffResult objects.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>diff;text;compare;myers;unified-diff</PackageTags>
+    <RepositoryUrl>https://github.com/philiprehberger/dotnet-text-diff</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
