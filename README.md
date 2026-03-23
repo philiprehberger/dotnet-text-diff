@@ -4,7 +4,7 @@
 [![NuGet](https://img.shields.io/nuget/v/Philiprehberger.TextDiff.svg)](https://www.nuget.org/packages/Philiprehberger.TextDiff)
 [![License](https://img.shields.io/github/license/philiprehberger/dotnet-text-diff)](LICENSE)
 
-Line-by-line text diff using Myers' algorithm — unified diff output, side-by-side comparison, and structured DiffResult objects.
+Line-by-line text diff using Myers' algorithm with unified diff output and structured DiffResult objects.
 
 ## Installation
 
