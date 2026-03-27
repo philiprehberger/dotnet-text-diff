@@ -3,6 +3,7 @@
 [![CI](https://github.com/philiprehberger/dotnet-text-diff/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/dotnet-text-diff/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/Philiprehberger.TextDiff.svg)](https://www.nuget.org/packages/Philiprehberger.TextDiff)
 [![License](https://img.shields.io/github/license/philiprehberger/dotnet-text-diff)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Line-by-line text diff using Myers' algorithm with unified diff output and structured DiffResult objects.
 
