@@ -38,6 +38,16 @@ internal static class MyersAlgorithm
     {
         var n = oldLines.Length;
         var m = newLines.Length;
+
+        if (n == 0 && m == 0)
+            return [];
+
+        if (n == 0)
+            return newLines.Select(l => new Edit(EditType.Insert, l)).ToList();
+
+        if (m == 0)
+            return oldLines.Select(l => new Edit(EditType.Delete, l)).ToList();
+
         var max = n + m;
 
         // V stores the furthest-reaching x for each diagonal k.

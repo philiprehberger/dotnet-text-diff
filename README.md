@@ -2,7 +2,11 @@
 
 [![CI](https://github.com/philiprehberger/dotnet-text-diff/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/dotnet-text-diff/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/Philiprehberger.TextDiff.svg)](https://www.nuget.org/packages/Philiprehberger.TextDiff)
+[![GitHub release](https://img.shields.io/github/v/release/philiprehberger/dotnet-text-diff)](https://github.com/philiprehberger/dotnet-text-diff/releases)
+[![Last updated](https://img.shields.io/github/last-commit/philiprehberger/dotnet-text-diff)](https://github.com/philiprehberger/dotnet-text-diff/commits/main)
 [![License](https://img.shields.io/github/license/philiprehberger/dotnet-text-diff)](LICENSE)
+[![Bug Reports](https://img.shields.io/github/issues/philiprehberger/dotnet-text-diff/bug)](https://github.com/philiprehberger/dotnet-text-diff/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![Feature Requests](https://img.shields.io/github/issues/philiprehberger/dotnet-text-diff/enhancement)](https://github.com/philiprehberger/dotnet-text-diff/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
 [![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Line-by-line text diff using Myers' algorithm with unified diff output and structured DiffResult objects.
@@ -20,25 +24,6 @@ using Philiprehberger.TextDiff;
 
 var result = Diff.Compare("hello\nworld", "hello\nearth");
 Console.WriteLine($"Changes: {result.HasChanges}, Added: {result.AddedCount}, Removed: {result.RemovedCount}");
-```
-
-### Compare Strings
-
-```csharp
-using Philiprehberger.TextDiff;
-
-var result = Diff.Compare("line one\nline two\nline three", "line one\nline 2\nline three");
-
-foreach (var line in result.Lines)
-{
-    var prefix = line.Type switch
-    {
-        DiffLineType.Added => "+",
-        DiffLineType.Removed => "-",
-        _ => " "
-    };
-    Console.WriteLine($"{prefix} {line.Content}");
-}
 ```
 
 ### Unified Diff Output
@@ -61,17 +46,72 @@ Console.WriteLine(unified);
 //  delta
 ```
 
-### Structured DiffResult
+### Diff Statistics
 
 ```csharp
 using Philiprehberger.TextDiff;
 
-var result = Diff.Compare("a\nb\nc", "a\nc");
+var result = Diff.Compare("a\nb\nc", "a\nx\nc");
 
-Console.WriteLine($"Has changes: {result.HasChanges}");
-Console.WriteLine($"Added: {result.AddedCount}");
-Console.WriteLine($"Removed: {result.RemovedCount}");
-Console.WriteLine($"Unchanged: {result.UnchangedCount}");
+Console.WriteLine($"Additions: {result.Statistics.Additions}");
+Console.WriteLine($"Deletions: {result.Statistics.Deletions}");
+Console.WriteLine($"Modifications: {result.Statistics.Modifications}");
+Console.WriteLine($"Change %: {result.Statistics.ChangePercentage}");
+```
+
+### Diff Options
+
+```csharp
+using Philiprehberger.TextDiff;
+
+var options = new DiffOptions
+{
+    IgnoreWhitespace = true,
+    IgnoreCase = true,
+    IgnoreBlankLines = true
+};
+
+var result = Diff.Compare("  Hello  \n\nWorld", "hello\nworld", options);
+Console.WriteLine($"Has changes: {result.HasChanges}"); // False
+```
+
+### Character-Level Inline Diff
+
+```csharp
+using Philiprehberger.TextDiff;
+
+var changes = InlineDiff.ComputeCharacterDiff("hello world", "hello earth");
+
+foreach (var change in changes)
+{
+    var marker = change.Type switch
+    {
+        ChangeType.Equal => " ",
+        ChangeType.Delete => "-",
+        ChangeType.Insert => "+"
+    };
+    Console.Write($"[{marker}{change.Text}]");
+}
+// [ hello ][- ][+e][-w][-o][-r][-l][-d][+a][+r][+t][+h]
+```
+
+### Word-Level Diff
+
+```csharp
+using Philiprehberger.TextDiff;
+
+var changes = InlineDiff.ComputeWordDiff("the quick brown fox", "the slow brown cat");
+
+foreach (var change in changes)
+{
+    if (change.Type == ChangeType.Delete)
+        Console.Write($"[-{change.Text}]");
+    else if (change.Type == ChangeType.Insert)
+        Console.Write($"[+{change.Text}]");
+    else
+        Console.Write(change.Text);
+}
+// the [-quick][+slow] brown [-fox][+cat]
 ```
 
 ## API
@@ -80,9 +120,9 @@ Console.WriteLine($"Unchanged: {result.UnchangedCount}");
 
 | Method | Description |
 |--------|-------------|
-| `Compare(oldText, newText)` | Compares two texts and returns a `DiffResult` with lines and statistics |
-| `Unified(oldText, newText, oldLabel?, newLabel?, context?)` | Produces a unified diff string with `---`, `+++`, and `@@` headers |
-| `Lines(oldText, newText)` | Returns a list of `DiffLine` entries with change types and line numbers |
+| `Compare(oldText, newText, options?)` | Compares two texts and returns a `DiffResult` with lines, counts, and statistics |
+| `Unified(oldText, newText, oldLabel?, newLabel?, context?, options?)` | Produces a unified diff string with `---`, `+++`, and `@@` headers |
+| `Lines(oldText, newText, options?)` | Returns a list of `DiffLine` entries with change types and line numbers |
 
 ### `DiffResult`
 
@@ -93,6 +133,7 @@ Console.WriteLine($"Unchanged: {result.UnchangedCount}");
 | `RemovedCount` | `int` | Number of removed lines |
 | `UnchangedCount` | `int` | Number of unchanged lines |
 | `HasChanges` | `bool` | Whether the texts differ |
+| `Statistics` | `DiffStatistics` | Detailed diff statistics |
 
 ### `DiffLine`
 
@@ -103,12 +144,59 @@ Console.WriteLine($"Unchanged: {result.UnchangedCount}");
 | `OldLineNumber` | `int?` | 1-based line number in the old text |
 | `NewLineNumber` | `int?` | 1-based line number in the new text |
 
+### `DiffStatistics`
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `Additions` | `int` | Number of added lines |
+| `Deletions` | `int` | Number of deleted lines |
+| `Modifications` | `int` | Number of modified lines (paired remove/add sequences) |
+| `ChangePercentage` | `double` | Percentage of lines that changed (0.0 to 100.0) |
+
+### `DiffOptions`
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `IgnoreWhitespace` | `bool` | `false` | Ignore leading and trailing whitespace |
+| `IgnoreCase` | `bool` | `false` | Ignore case differences |
+| `IgnoreBlankLines` | `bool` | `false` | Skip blank lines when comparing |
+| `Mode` | `DiffMode` | `Line` | Diff granularity: `Line`, `Word`, or `Character` |
+
+### `InlineDiff`
+
+| Method | Description |
+|--------|-------------|
+| `ComputeCharacterDiff(oldText, newText)` | Character-level diff returning `InlineChange` segments |
+| `ComputeWordDiff(oldText, newText)` | Word-level diff returning `InlineChange` segments |
+
+### `InlineChange`
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `Type` | `ChangeType` | `Equal`, `Insert`, or `Delete` |
+| `Text` | `string` | The text content of the segment |
+
+### `DiffMode`
+
+| Value | Description |
+|-------|-------------|
+| `Line` | Compare text line by line |
+| `Word` | Compare text word by word |
+| `Character` | Compare text character by character |
+
 ## Development
 
 ```bash
 dotnet build src/Philiprehberger.TextDiff.csproj --configuration Release
 ```
 
+## Support
+
+If you find this package useful, consider giving it a star on GitHub — it helps motivate continued maintenance and development.
+
+[![LinkedIn](https://img.shields.io/badge/Philip%20Rehberger-LinkedIn-0A66C2?logo=linkedin)](https://www.linkedin.com/in/philiprehberger)
+[![More packages](https://img.shields.io/badge/more-open%20source%20packages-blue)](https://philiprehberger.com/open-source-packages)
+
 ## License
 
-MIT
+[MIT](LICENSE)

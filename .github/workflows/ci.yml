@@ -17,6 +17,7 @@ jobs:
           dotnet-version: '8.0.x'
       - run: dotnet restore src/Philiprehberger.TextDiff.csproj
       - run: dotnet build src/Philiprehberger.TextDiff.csproj --configuration Release --no-restore
+      - run: dotnet test tests/Philiprehberger.TextDiff.Tests/Philiprehberger.TextDiff.Tests.csproj --configuration Release --no-restore
 
   publish:
     needs: build
