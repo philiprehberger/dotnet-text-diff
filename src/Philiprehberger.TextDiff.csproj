@@ -11,7 +11,7 @@
 
     <!-- Package metadata -->
     <PackageId>Philiprehberger.TextDiff</PackageId>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <Authors>Philip Rehberger</Authors>
     <Description>Line-by-line text diff using Myers' algorithm with unified diff output and structured DiffResult objects.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
